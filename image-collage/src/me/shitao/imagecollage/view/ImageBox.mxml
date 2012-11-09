@@ -2,6 +2,7 @@
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 				   xmlns:s="library://ns.adobe.com/flex/spark" 
 				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   xmlns:view="me.shitao.imagecollage.view.*"
 				   creationComplete="onCeationCompleteHandler(event)">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -9,12 +10,22 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import me.shitao.imagecollage.event.ValueEvent;
+			import me.shitao.imagecollage.vo.ScaleVo;
+			
 			import mx.events.FlexEvent;
+			import mx.events.PropertyChangeEvent;
+			import mx.events.ResizeEvent;
 			
 			private var file:FileReference = new FileReference();
+			public var _scale:ScaleVo = new ScaleVo();
+			private var state:String = "button";
+			private var _imageData:ByteArray;
+			private var _imageDataChanged:Boolean;
 
 			protected function onCeationCompleteHandler(event:FlexEvent):void
 			{
+				_scale.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, scalePropertyChangeEventHandler);
 				file.addEventListener(Event.SELECT, fileReference_selectHandler);
 				file.addEventListener(Event.COMPLETE, fileReference_completeHandler);
 				btn.addEventListener(MouseEvent.CLICK, fileButton_clickhandler);
@@ -33,46 +44,154 @@
 			
 			private function fileReference_completeHandler(evt:Event):void 
 			{
+				_imageData = file.data;
 				img.source = file.data;
+				state = "image";
+				invalidateProperties();
 			}
 			
 			private function img_completeHandler(event:Event):void
 			{
-				btnCanvas.includeInLayout = false;
-				btnCanvas.visible = false;
-				imgCanvas.includeInLayout = true;
-				imgCanvas.visible = true;
-				
+				_scale.currentValue = 1;
+				coordinateImgSize();
 			}
 			
 			private function coordinateImgSize():void
 			{
-				var s1:Number = 1;
-				var s2:Number = 1;
-				s1 = imgCanvas.width / img.width;
-				s2 = imgCanvas.height / img.height;
-				var s:Number = Math.abs(s1-1) - Math.abs(s2-1) > 0 ? s2 : s1;
-				img.width = img.width * s;
-				img.height = img.height * s;
+				var s:Number = 1;
+				var sw:Number = 1;
+				var sh:Number = 1;
+				sw = imgCanvas.width / img.contentWidth;
+				sh = imgCanvas.height / img.contentHeight;
+				if(sh * img.contentWidth < imgCanvas.width )
+				{
+					s = sw;
+				}
+				else if(sw*img.contentHeight < imgCanvas.height)
+				{
+					s = sh;
+				}
+				else
+				{
+					s = sh;
+				}
+				img.width = img.contentWidth * s;
+				img.height = img.contentHeight * s;
+				img.x = (imgCanvas.width - img.width)/2;
+				img.y = (imgCanvas.height - img.height)/2;
 			}
-
+		
 			protected function closeBtn_clickHandler(event:MouseEvent):void
 			{
 				img.source = null;
-				btnCanvas.includeInLayout = true;
-				btnCanvas.visible = true;
-				imgCanvas.includeInLayout = false;
-				imgCanvas.visible = false;
+				state = "button";
+				invalidateProperties();
+			}
+			
+			protected function imgCanvas_rollOverHandler(event:MouseEvent):void
+			{
+				closeBtn.includeInLayout = true;
+				closeBtn.visible = true;
+			}
+			
+			protected function imgCanvas_rollOutHandler(event:MouseEvent):void
+			{
+				closeBtn.includeInLayout = false;
+				closeBtn.visible = false;
 			}
 
+			protected function img_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new ValueEvent("showScaleBar",{"img":img, "scale":_scale }, true));
+				event.stopImmediatePropagation();
+			}
+			
+			protected function img_resizeHandler(event:ResizeEvent):void
+			{
+				img.x = (imgCanvas.width - img.width)/2;
+				img.y = (imgCanvas.height - img.height)/2;
+			}
+			
+			protected function scalePropertyChangeEventHandler(event:PropertyChangeEvent):void
+			{
+				if(event.property == "currentValue")
+				{
+					var newScale:Number = Number(event.newValue)/Number(event.oldValue);
+					img.width = img.width * newScale;
+					img.height = img.height * newScale;
+					img.x = (imgCanvas.width - img.width)/2;
+					img.y = (imgCanvas.height - img.height)/2;
+				}
+			}
+			
+			public function getImageData():ByteArray
+			{
+				return _imageData;
+			}
+			
+			public function setImageData(data:ByteArray):void
+			{
+				_imageData = data;
+				_imageDataChanged = true;
+				state = "image";
+				invalidateProperties();
+				invalidateDisplayList();
+			}
+			
+			override protected function childrenCreated():void
+			{
+				super.childrenCreated();
+				invalidateProperties();
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				if(_imageDataChanged)
+				{
+					_imageDataChanged = false;
+					img.source = _imageData;
+				}
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				if(state == "image")
+				{
+					if(imgCanvas && btnCanvas)
+					{
+						imgCanvas.includeInLayout = true;
+						imgCanvas.visible = true;
+						btnCanvas.includeInLayout = false;
+						btnCanvas.visible = false;
+					}
+				}
+				else
+				{
+					if(imgCanvas && btnCanvas)
+					{
+						imgCanvas.includeInLayout = false;
+						imgCanvas.visible = false;
+						btnCanvas.includeInLayout = true;
+						btnCanvas.visible = true;
+					}
+				}
+			}
 		]]>
 	</fx:Script>
 	<mx:Canvas id="imgCanvas" width="100%" height="100%" 
-			   includeInLayout="false" visible="false" 
+			   rollOver="imgCanvas_rollOverHandler(event);"
+			   rollOut="imgCanvas_rollOutHandler(event);"
 			   horizontalScrollPolicy="off" verticalScrollPolicy="off">
-		<mx:Image id="img" complete="img_completeHandler(event);" />
+		<view:SmoothImage id="img" complete="img_completeHandler(event);" 
+						  scaleContent="true"
+						  maintainProjectionCenter="true"
+						  maintainAspectRatio="true"
+				  		  click="img_clickHandler(event);"/>
 		<mx:Image id="closeBtn" source="@Embed(source='deleteIcon.png')" 
 				  right="3" top="3" buttonMode="true" 
+				  includeInLayout="false" visible="false"
 				  click="closeBtn_clickHandler(event)"/> 
 	</mx:Canvas>			   
 	<mx:Canvas id="btnCanvas" width="100%" height="100%" 

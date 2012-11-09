@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
 				   xmlns:s="library://ns.adobe.com/flex/spark" 
-				   xmlns:mx="library://ns.adobe.com/flex/mx">
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:view="me.shitao.imagecollage.view.*"
+				   creationComplete="onCreationComplete(event);"
+				   addedToStage="onAddedToStage(event);"
+				   removedFromStage="onRemoveFromStage(event);">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
+			import me.shitao.imagecollage.event.ValueEvent;
 			import me.shitao.imagecollage.vo.CollageLayoutVo;
+			import me.shitao.imagecollage.vo.ScaleVo;
+			
+			import mx.controls.Image;
+			import mx.events.FlexEvent;
 			
 			private var _selectedTemplate:CollageLayoutVo;
+			[Bindable]
+			private var _scale:ScaleVo;
+			private var _imageDatas:Array = [];
 			
 			public function get selectedTemplate():CollageLayoutVo
 			{
@@ -30,6 +42,7 @@
 			{
 				if(_selectedTemplate)
 				{
+					getImageDatas();
 					container.removeAllElements();
 					var xs:Number = (container.width)/100;
 					var ys:Number = (container.height)/100;
@@ -42,27 +55,95 @@
 						bc.height = (rect.bottom - rect.top) * ys;
 						bc.setStyle("backgroundColor", "#cccccc");
 						container.addElement(bc);
+						if(_imageDatas.length != 0){
+							bc.setImageData(_imageDatas.pop());
+						}
 					}
 				}
 			}
 			
+			private function getImageDatas():void
+			{
+				_imageDatas.splice();
+				for (var i:int = 0; i < container.numElements; i++)
+				{
+					var e:ImageBox = container.getElementAt(i) as ImageBox;
+					var imageData:ByteArray = e.getImageData();
+					if(imageData)
+					{
+						_imageDatas.push(imageData);
+					}
+				}
+			}
+			
+			private function onCreationComplete(event:FlexEvent):void
+			{
+				addEventListener("showScaleBar", showScaleBarHandler);
+			}
+			
+			private function onAddedToStage(event:Event):void
+			{
+				stage.addEventListener(MouseEvent.CLICK, stageClickHandler);
+			}
+			
+			private function onRemoveFromStage(event:Event):void
+			{
+				stage.removeEventListener(MouseEvent.CLICK, stageClickHandler);
+			}
+			
+			private function stageClickHandler(event:MouseEvent):void
+			{
+				if(!isChildrenOfContainer(event.target, scaleBar))
+				{
+					scaleBar.visible = false;
+					scaleBar.includeInLayout = false;
+				}
+			}
+			
+			private function isChildrenOfContainer(o:Object, c:Object):Boolean
+			{
+				if(o && o.parent && (o == c || o.parent == c))
+				{
+					return true;
+				}
+				else if(o && o.parent) 
+				{
+					return isChildrenOfContainer(o.parent, c);			
+				}
+				else
+				{
+					return false;
+				}
+			}
+			
+			private function showScaleBarHandler(event:ValueEvent):void
+			{
+				scaleBar.scale = event.data.scale as ScaleVo;
+				scaleBar.setScale(scaleBar.scale.currentValue);
+				scaleBar.visible = true;
+				scaleBar.includeInLayout = true;
+			}
+			
 		]]>
 	</fx:Script>
-	<s:layout>
-		<s:VerticalLayout gap="10" horizontalAlign="center" verticalAlign="middle"
-						  paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"/>
-	</s:layout>
 	<s:Group width="100%" height="100%">
 		<s:layout>
-			<s:VerticalLayout gap="0" horizontalAlign="center" verticalAlign="middle"/>
+			<s:VerticalLayout gap="10" horizontalAlign="center" verticalAlign="middle"
+							  paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"/>
 		</s:layout>
-		<s:Group id="container" width="100%" height="100%" />	
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" horizontalAlign="center" verticalAlign="middle"/>
+			</s:layout>
+			<s:Group id="container" width="100%" height="100%" />	
+		</s:Group>
+		<s:Group id="controlbar" width="100%" >
+			<s:layout>
+				<s:HorizontalLayout gap="10" horizontalAlign="right" verticalAlign="middle"/>
+			</s:layout>
+			<s:Button label="提交" />
+			<s:Button label="取消" />
+		</s:Group>
 	</s:Group>
-	<s:Group id="controlbar" width="100%" >
-		<s:layout>
-			<s:HorizontalLayout gap="10" horizontalAlign="right" verticalAlign="middle"/>
-		</s:layout>
-		<s:Button label="提交" />
-		<s:Button label="取消" />
-	</s:Group>
+	<view:ScaleBar id="scaleBar" includeInLayout="false" visible="false"/>
 </s:BorderContainer>

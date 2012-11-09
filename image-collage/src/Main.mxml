@@ -5,10 +5,22 @@
 			   xmlns:view="me.shitao.imagecollage.view.*"
 			   backgroundColor="#ffffff"
 			   minHeight="520"
-			   minWidth="520">
+			   minWidth="520"
+			   creationComplete="onCreationCompleteHandler(event)"
+			   >
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function onCreationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+		]]>
+	</fx:Script>
 	<s:layout>
 		<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" 
 			paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" gap="0" />
