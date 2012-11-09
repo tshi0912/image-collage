@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
-			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600">
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:view="me.shitao.imagecollage.view.*"
+			   backgroundColor="#ffffff"
+			   minHeight="520"
+			   minWidth="520">
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" 
+			paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" gap="0" />
+	</s:layout>
+	<view:MainBox />
 </s:Application>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import me.shitao.imagecollage.vo.CollageLayoutVo;
+			
+			private var _selectedTemplate:CollageLayoutVo;
+			
+			public function get selectedTemplate():CollageLayoutVo
+			{
+				return _selectedTemplate;
+			}
+			
+			public function  set selectedTemplate(value:CollageLayoutVo):void
+			{
+				if(_selectedTemplate != value)
+				{
+					_selectedTemplate = value;
+					generateView();
+					this.dispatchEvent(new Event("selectedTemplateChanged"));
+				}
+			}
+			
+			private function generateView():void
+			{
+				if(_selectedTemplate)
+				{
+					container.removeAllElements();
+					var xs:Number = (container.width)/100;
+					var ys:Number = (container.height)/100;
+					for each(var rect:Rectangle in _selectedTemplate.rects)
+					{
+						var bc:ImageBox = new ImageBox();
+						bc.x = rect.left * xs;
+						bc.y = rect.top * ys;
+						bc.width = (rect.right - rect.left) * xs;
+						bc.height = (rect.bottom - rect.top) * ys;
+						bc.setStyle("backgroundColor", "#cccccc");
+						container.addElement(bc);
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout gap="10" horizontalAlign="center" verticalAlign="middle"
+						  paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"/>
+	</s:layout>
+	<s:Group width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout gap="0" horizontalAlign="center" verticalAlign="middle"/>
+		</s:layout>
+		<s:Group id="container" width="100%" height="100%" />	
+	</s:Group>
+	<s:Group id="controlbar" width="100%" >
+		<s:layout>
+			<s:HorizontalLayout gap="10" horizontalAlign="right" verticalAlign="middle"/>
+		</s:layout>
+		<s:Button label="提交" />
+		<s:Button label="取消" />
+	</s:Group>
+</s:BorderContainer>

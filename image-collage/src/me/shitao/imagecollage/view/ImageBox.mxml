@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   creationComplete="onCeationCompleteHandler(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			private var file:FileReference = new FileReference();
+
+			protected function onCeationCompleteHandler(event:FlexEvent):void
+			{
+				file.addEventListener(Event.SELECT, fileReference_selectHandler);
+				file.addEventListener(Event.COMPLETE, fileReference_completeHandler);
+				btn.addEventListener(MouseEvent.CLICK, fileButton_clickhandler);
+			}
+			
+			private function fileButton_clickhandler(event:Event):void
+			{
+				file.browse([new FileFilter("Images (*.jpg, *.jpeg, *.gif, *.png)",
+					"*.jpg;*.jpeg;*.gif;*.png")]);
+			}
+			
+			private function fileReference_selectHandler(event:Event):void
+			{
+				file.load();
+			}
+			
+			private function fileReference_completeHandler(evt:Event):void 
+			{
+				img.source = file.data;
+			}
+			
+			private function img_completeHandler(event:Event):void
+			{
+				btnCanvas.includeInLayout = false;
+				btnCanvas.visible = false;
+				imgCanvas.includeInLayout = true;
+				imgCanvas.visible = true;
+				
+			}
+			
+			private function coordinateImgSize():void
+			{
+				var s1:Number = 1;
+				var s2:Number = 1;
+				s1 = imgCanvas.width / img.width;
+				s2 = imgCanvas.height / img.height;
+				var s:Number = Math.abs(s1-1) - Math.abs(s2-1) > 0 ? s2 : s1;
+				img.width = img.width * s;
+				img.height = img.height * s;
+			}
+
+			protected function closeBtn_clickHandler(event:MouseEvent):void
+			{
+				img.source = null;
+				btnCanvas.includeInLayout = true;
+				btnCanvas.visible = true;
+				imgCanvas.includeInLayout = false;
+				imgCanvas.visible = false;
+			}
+
+		]]>
+	</fx:Script>
+	<mx:Canvas id="imgCanvas" width="100%" height="100%" 
+			   includeInLayout="false" visible="false" 
+			   horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Image id="img" complete="img_completeHandler(event);" />
+		<mx:Image id="closeBtn" source="@Embed(source='deleteIcon.png')" 
+				  right="3" top="3" buttonMode="true" 
+				  click="closeBtn_clickHandler(event)"/> 
+	</mx:Canvas>			   
+	<mx:Canvas id="btnCanvas" width="100%" height="100%" 
+			   horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Button id="btn" width="100%" height="100%" label="+添加图片" buttonMode="true" />
+	</mx:Canvas>
+</s:Group>
