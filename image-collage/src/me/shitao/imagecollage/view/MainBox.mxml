@@ -5,6 +5,11 @@
 				   xmlns:view="me.shitao.imagecollage.view.*"
 				   width="500" 
 				   height="500">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+		]]>
+	</fx:Script>
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>

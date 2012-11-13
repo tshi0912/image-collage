@@ -29,11 +29,11 @@
 					var ys:Number = container.height/100;
 					for each(var rect:Rectangle in vo.rects)
 					{
-						var bc:BorderContainer = new BorderContainer();
-						bc.x = rect.left * xs;
-						bc.y = rect.top * ys;
-						bc.width = (rect.right - rect.left) * xs;
-						bc.height = (rect.bottom - rect.top) * ys;
+						var bc:SkinnableContainer = new SkinnableContainer();
+						bc.x = Math.floor(rect.left * xs);
+						bc.y = Math.floor(rect.top * ys);
+						bc.width = Math.floor((rect.right - rect.left) * xs);
+						bc.height = Math.floor((rect.bottom - rect.top) * ys);
 						bc.setStyle("backgroundColor", "#cccccc");
 						container.addElement(bc);
 					}

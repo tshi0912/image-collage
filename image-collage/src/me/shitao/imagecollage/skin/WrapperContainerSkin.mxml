@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx">
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("spark.components.BorderContainer")]
+	</fx:Metadata>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="disabled" />
+		<s:State name="normal" />
+	</s:states>
+	
+	<!-- drop shadow -->
+	<s:Rect left="0" top="0" right="0" bottom="0">
+		<s:filters>
+			<s:DropShadowFilter 
+				blurX="3" blurY="3" 
+				alpha="0.3" 
+				distance="3" 
+				angle="45"                 
+				knockout="true"/>
+		</s:filters>
+		<s:fill>
+			<s:SolidColor color="0x000000"/>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- layer 1: border -->
+	<s:Rect left="0" right="0" top="0" bottom="0">
+		<s:stroke>
+			<s:SolidColorStroke color="0x000000" alpha="0.50" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	
+	<!-- SkinParts
+	name=contentGroup, type=spark.components.Group, required=false
+	-->
+	<s:Group id="contentGroup" right="1" left="1" top="1" bottom="1" 
+			 minWidth="0" minHeight="0">
+	</s:Group>
+</s:Skin>

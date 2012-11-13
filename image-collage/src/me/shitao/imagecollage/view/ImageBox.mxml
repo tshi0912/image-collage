@@ -28,6 +28,7 @@
 			private var _moveStageY:Number;
 			[Embed(source="cursor_fist.png")]
 			private static const _fist:Class;
+			private var roundedMask:Sprite = new Sprite();
 
 			protected function onCeationCompleteHandler(event:FlexEvent):void
 			{
@@ -35,6 +36,17 @@
 				file.addEventListener(Event.SELECT, fileReference_selectHandler);
 				file.addEventListener(Event.COMPLETE, fileReference_completeHandler);
 				btn.addEventListener(MouseEvent.CLICK, fileButton_clickhandler);
+				imgCanvas.rawChildren.addChild(roundedMask);
+			}
+			
+			private function setMask():void
+			{
+				roundedMask.graphics.clear();
+				roundedMask.graphics.beginFill(0xFF0000);
+				roundedMask.graphics.drawRoundRect(0, 0,
+					imgCanvas.width, imgCanvas.height,10, 10);
+				roundedMask.graphics.endFill();
+				img.mask = roundedMask;
 			}
 			
 			private function fileButton_clickhandler(event:Event):void
@@ -60,6 +72,7 @@
 			{
 				_scale.currentValue = 1;
 				coordinateImgSize();
+				setMask();
 			}
 			
 			private function coordinateImgSize():void
@@ -240,25 +253,25 @@
 		]]>
 	</fx:Script>
 	<mx:Canvas id="imgCanvas" width="100%" height="100%" 
+			   horizontalScrollPolicy="off" verticalScrollPolicy="off"
 			   rollOver="imgCanvas_rollOverHandler(event);"
-			   rollOut="imgCanvas_rollOutHandler(event);"
-			   horizontalScrollPolicy="off" verticalScrollPolicy="off">
-		<view:SmoothImage id="img" 
-						  scaleContent="true"
+			   rollOut="imgCanvas_rollOutHandler(event);">
+		<view:SmoothImage id="img" scaleContent="true"
 						  maintainProjectionCenter="true"
 						  maintainAspectRatio="true"
 						  complete="img_completeHandler(event);"
 						  mouseMove="img_mouseMoveHandler(event)"
 						  mouseDown="img_mouseDownHandler(event)"
 						  mouseUp="img_mouseUpHandler(event)"
-				  		  click="img_clickHandler(event);"/>
+				  		  click="img_clickHandler(event);" />
 		<mx:Image id="closeBtn" source="@Embed(source='deleteIcon.png')" 
 				  right="3" top="3" buttonMode="true" 
 				  includeInLayout="false" visible="false"
-				  click="closeBtn_clickHandler(event)"/> 
-	</mx:Canvas>			   
+				  click="closeBtn_clickHandler(event)"/>
+	</mx:Canvas>
 	<mx:Canvas id="btnCanvas" width="100%" height="100%" 
 			   horizontalScrollPolicy="off" verticalScrollPolicy="off">
-		<mx:Button id="btn" width="100%" height="100%" label="+添加图片" buttonMode="true" />
+		<mx:Button id="btn" width="100%" height="100%" cornerRadius="5"
+				   label="+添加图片" buttonMode="true" />
 	</mx:Canvas>
 </s:Group>

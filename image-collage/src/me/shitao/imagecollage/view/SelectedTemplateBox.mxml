@@ -16,7 +16,12 @@
 			import me.shitao.imagecollage.vo.ScaleVo;
 			
 			import mx.controls.Image;
+			import mx.core.UIComponent;
 			import mx.events.FlexEvent;
+			import mx.graphics.codec.JPEGEncoder;
+			import mx.graphics.codec.PNGEncoder;
+			import mx.managers.PopUpManager;
+			import mx.utils.UIDUtil;
 			
 			private var _selectedTemplate:CollageLayoutVo;
 			[Bindable]
@@ -44,22 +49,61 @@
 				{
 					getImageDatas();
 					container.removeAllElements();
-					var xs:Number = (container.width)/100;
-					var ys:Number = (container.height)/100;
+					var wp:Rectangle = getWrapperSize();
+					trace("wrapper box:" + "left=" + wp.x + ",top="+wp.y+",width="+wp.width+",height="+wp.height);
+					borderContainer.width = wrapper.width * (wp.width/100);
+					borderContainer.height = wrapper.height * (wp.height/100);
+					var xs:Number = (borderContainer.width)/(wp.width + 4);
+					var ys:Number = (borderContainer.height)/(wp.height + 4);
 					for each(var rect:Rectangle in _selectedTemplate.rects)
 					{
 						var bc:ImageBox = new ImageBox();
-						bc.x = rect.left * xs;
-						bc.y = rect.top * ys;
-						bc.width = (rect.right - rect.left) * xs;
-						bc.height = (rect.bottom - rect.top) * ys;
+						bc.x = Math.floor((rect.left - wp.left + 2) * xs);
+						bc.y = Math.floor((rect.top - wp.top + 2) * ys);
+						bc.width = Math.floor((rect.right - rect.left) * xs);
+						bc.height = Math.floor((rect.bottom  - rect.top) * ys);
 						bc.setStyle("backgroundColor", "#cccccc");
 						container.addElement(bc);
+						trace("image box:" + "left=" + bc.x + ",top="+bc.y+",width="+bc.width+",height="+bc.height);
 						if(_imageDatas.length != 0){
 							bc.setImageData(_imageDatas.pop());
 						}
 					}
 				}
+			}
+			
+			private function getWrapperSize():Rectangle
+			{
+				var left:int = 0;
+				var top:int = 0;
+				var right:int = 100;
+				var bottom:int = 100;
+				for(var i:int = 0; i < _selectedTemplate.rects.length; i++)
+				{
+					var rect:Rectangle = _selectedTemplate.rects[i];
+					if(i == 0){
+						left = rect.left;
+						top = rect.top;
+						right = rect.right;
+						bottom = rect.bottom;
+					}else{
+						if(rect.left < left){
+							left = rect.left;
+						}
+						if(rect.right > right){
+							right = rect.right;
+						}
+						if(rect.top < top)
+						{
+							top = rect.top;
+						}
+						if(rect.bottom > bottom)
+						{
+							bottom = rect.bottom;
+						}
+					}					
+				}
+				return new Rectangle(left, top, right-left, bottom-top);
 			}
 			
 			private function getImageDatas():void
@@ -124,6 +168,28 @@
 				scaleBar.includeInLayout = true;
 			}
 			
+			private function getBitmapData():BitmapData
+			{
+				var bd:BitmapData = new BitmapData( container.width, container.height );
+				var m:Matrix = new Matrix();
+				bd.draw(container, m);
+				return bd;
+			}
+			
+			private function previewBtn_clickHandler(event:MouseEvent):void
+			{
+				var preview:ImagePreview = new ImagePreview();
+				preview.bitmapData = getBitmapData();
+				PopUpManager.addPopUp(preview, parentApplication.systemManager, true);
+				PopUpManager.centerPopUp(preview);
+			}
+			
+			private function submitBtn_clickHandler(event:MouseEvent):void
+			{
+				var byteArr:ByteArray =new PNGEncoder().encode(getBitmapData());  
+				var fileRefer:FileReference = new FileReference();  
+				fileRefer.save(byteArr,new Date().time+".png");  
+			}
 		]]>
 	</fx:Script>
 	<s:Group width="100%" height="100%">
@@ -131,17 +197,27 @@
 			<s:VerticalLayout gap="10" horizontalAlign="center" verticalAlign="middle"
 							  paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"/>
 		</s:layout>
-		<s:Group width="100%" height="100%">
+		<s:Group id="wrapper" width="100%" height="100%">
 			<s:layout>
-				<s:VerticalLayout gap="0" horizontalAlign="center" verticalAlign="middle"/>
+				<s:VerticalLayout horizontalAlign="center" verticalAlign="middle"/>
 			</s:layout>
-			<s:Group id="container" width="100%" height="100%" />	
+			<s:BorderContainer id="borderContainer" 
+							   skinClass="me.shitao.imagecollage.skin.WrapperContainerSkin">
+				<!--s:Group id="wrapper" width="100%" height="100%">
+				<s:layout>
+				<s:VerticalLayout gap="0" horizontalAlign="center" verticalAlign="middle"/>
+				</s:layout>
+				<s:Group id="container" width="100%" height="100%"/>	
+				</s:Group -->
+				<s:Group id="container" width="100%" height="100%"/>
+			</s:BorderContainer>
 		</s:Group>
 		<s:Group id="controlbar" width="100%" >
 			<s:layout>
 				<s:HorizontalLayout gap="10" horizontalAlign="right" verticalAlign="middle"/>
 			</s:layout>
-			<s:Button label="提交" />
+			<s:Button id="previewBtn" label="预览" click="previewBtn_clickHandler(event);" />
+			<s:Button id="submitBtn" label="提交" click="submitBtn_clickHandler(event);" />
 			<s:Button label="取消" />
 		</s:Group>
 	</s:Group>
