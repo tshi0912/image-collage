@@ -11,14 +11,13 @@
 
 	<fx:Script>
 		<![CDATA[
-			import me.shitao.imagecollage.event.ValueEvent;
-			import me.shitao.imagecollage.vo.ScaleVo;
-			
 			import mx.events.FlexEvent;
 			import mx.events.PropertyChangeEvent;
 			import mx.events.ResizeEvent;
 			import mx.managers.CursorManager;
 			import mx.managers.CursorManagerPriority;
+			import me.shitao.imagecollage.event.ValueEvent;
+			import me.shitao.imagecollage.vo.ScaleVo;
 
 			[Embed(source="cursor_fist.png")]
 			private static const _fist:Class;
@@ -32,6 +31,31 @@
 			private var file:FileReference=new FileReference();
 			private var roundedMask:Sprite=new Sprite();
 			private var state:String="button";
+
+			public function coordinateImgSize():void
+			{
+				var s:Number=1;
+				var sw:Number=1;
+				var sh:Number=1;
+				sw=imgCanvas.width / img.contentWidth;
+				sh=imgCanvas.height / img.contentHeight;
+				if (sh * img.contentWidth < imgCanvas.width)
+				{
+					s=sw;
+				}
+				else if (sw * img.contentHeight < imgCanvas.height)
+				{
+					s=sh;
+				}
+				else
+				{
+					s=sh;
+				}
+				img.width=img.contentWidth * s;
+				img.height=img.contentHeight * s;
+				img.x=(imgCanvas.width - img.width) / 2;
+				img.y=(imgCanvas.height - img.height) / 2;
+			}
 
 			public function getImageData():ByteArray
 			{
@@ -47,6 +71,21 @@
 				invalidateDisplayList();
 			}
 
+			public function setMask():void
+			{
+				roundedMask.graphics.clear();
+				roundedMask.graphics.beginFill(0xFF0000);
+				roundedMask.graphics.drawRoundRect(0, 0, imgCanvas.width, imgCanvas.height, 10, 10);
+				roundedMask.graphics.endFill();
+				img.mask=roundedMask;
+			}
+
+			override public function set width(value:Number):void
+			{
+				super.width=value;
+				imgCanvas.width=value;
+			}
+
 			override protected function childrenCreated():void
 			{
 				super.childrenCreated();
@@ -57,9 +96,9 @@
 			{
 				img.source=null;
 				_imageData=null;
-				var evt:ValueEvent = new ValueEvent(ValueEvent.CLOSE_IMAGE, this, true);
+				var evt:ValueEvent=new ValueEvent(ValueEvent.CLOSE_IMAGE, this, true);
 				dispatchEvent(evt);
-				if(!evt.preventDefault())
+				if (!evt.preventDefault())
 				{
 					state="button";
 					invalidateProperties();
@@ -89,12 +128,6 @@
 						btnCanvas.visible=true;
 					}
 				}
-			}
-			
-			override protected function measure():void
-			{
-				super.measure();
-				coordinateImgSize();
 			}
 
 			protected function imgCanvas_rollOutHandler(event:MouseEvent):void
@@ -165,6 +198,12 @@
 				img.y=(imgCanvas.height - img.height) / 2;
 			}
 
+			override protected function measure():void
+			{
+				super.measure();
+				coordinateImgSize();
+			}
+
 			protected function onCeationCompleteHandler(event:FlexEvent):void
 			{
 				_scale.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, scalePropertyChangeEventHandler);
@@ -210,31 +249,6 @@
 				}
 			}
 
-			public function coordinateImgSize():void
-			{
-				var s:Number=1;
-				var sw:Number=1;
-				var sh:Number=1;
-				sw=imgCanvas.width / img.contentWidth;
-				sh=imgCanvas.height / img.contentHeight;
-				if (sh * img.contentWidth < imgCanvas.width)
-				{
-					s=sw;
-				}
-				else if (sw * img.contentHeight < imgCanvas.height)
-				{
-					s=sh;
-				}
-				else
-				{
-					s=sh;
-				}
-				img.width=img.contentWidth * s;
-				img.height=img.contentHeight * s;
-				img.x=(imgCanvas.width - img.width) / 2;
-				img.y=(imgCanvas.height - img.height) / 2;
-			}
-
 			private function fileButton_clickhandler(event:Event):void
 			{
 				file.browse([new FileFilter("Images (*.jpg, *.jpeg, *.gif, *.png)", "*.jpg;*.jpeg;*.gif;*.png")]);
@@ -258,21 +272,6 @@
 				_scale.currentValue=1;
 				coordinateImgSize();
 				setMask();
-			}
-
-			public function setMask():void
-			{
-				roundedMask.graphics.clear();
-				roundedMask.graphics.beginFill(0xFF0000);
-				roundedMask.graphics.drawRoundRect(0, 0, imgCanvas.width, imgCanvas.height, 10, 10);
-				roundedMask.graphics.endFill();
-				img.mask=roundedMask;
-			}
-			
-			override public function set width(value:Number):void
-			{
-				super.width = value;
-				imgCanvas.width = value;
 			}
 		]]>
 	</fx:Script>
