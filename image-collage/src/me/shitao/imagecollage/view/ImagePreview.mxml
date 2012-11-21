@@ -4,6 +4,7 @@
 		 xmlns:mx="library://ns.adobe.com/flex/mx"
 		 initialize="onInitialize(event);"
 		 minHeight="30"
+		 backgroundColor="#cccccc"
 		 close="onClose(event);"
 		 title="Image Preview">
 	<s:layout>

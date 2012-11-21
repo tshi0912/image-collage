@@ -1,4 +1,4 @@
-package me.shitao.imagecollage.view
+package me.shitao.imagecollage.view.comp
 {
     import mx.controls.Image;
     import flash.display.Loader;

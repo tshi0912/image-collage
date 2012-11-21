@@ -5,6 +5,6 @@ package me.shitao.imagecollage.vo
 	[Bindable]
 	public class ScaleVo extends EventDispatcher
 	{
-		public var currentValue:Number = 1;
+		public var currentValue:Number=1;
 	}
 }

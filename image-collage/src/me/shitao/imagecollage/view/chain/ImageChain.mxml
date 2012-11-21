@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009"
+				   xmlns:s="library://ns.adobe.com/flex/spark"
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   creationComplete="onCreationComplete(event);">
+	<fx:Script>
+		<![CDATA[
+			import me.shitao.imagecollage.event.ValueEvent;
+			import me.shitao.imagecollage.view.ImagePreview;
+			import me.shitao.imagecollage.view.comp.ImageBox;
+			
+			import mx.core.IVisualElement;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.graphics.codec.PNGEncoder;
+			import mx.managers.PopUpManager;
+
+			private var file:FileReference=new FileReference();
+
+			private function addExtarBtn_clickHandler(event:Event):void
+			{
+				file.browse([new FileFilter("Images (*.jpg, *.jpeg, *.gif, *.png)", "*.jpg;*.jpeg;*.gif;*.png")]);
+			}
+
+			private function closeImageHandler(event:ValueEvent):void
+			{
+				if (event.data)
+				{
+					chainGroup.removeElement(event.data as IVisualElement);
+					event.preventDefault();
+				}
+			}
+
+			private function fileReference_completeHandler(evt:Event):void
+			{
+				var ib:ImageBox=new ImageBox();
+				ib.width=chainGroup.width;
+				ib.height=200;
+				ib.setImageData(file.data);
+				chainGroup.addElement(ib);
+			}
+
+			private function fileReference_selectHandler(event:Event):void
+			{
+				if (!chainWrapper.visible)
+				{
+					chainWrapper.visible=true;
+					chainWrapper.includeInLayout=true;
+				}
+				file.load();
+			}
+
+			private function getBitmapData():BitmapData
+			{
+				if (!chainWrapper.visible)
+				{
+					return null
+				}
+				var bd:BitmapData=new BitmapData(chainWrapper.width, chainWrapper.height);
+				var m:Matrix=new Matrix();
+				bd.draw(chainWrapper, m);
+				return bd;
+			}
+
+			private function onCreationComplete(event:FlexEvent):void
+			{
+				file.addEventListener(Event.SELECT, fileReference_selectHandler);
+				file.addEventListener(Event.COMPLETE, fileReference_completeHandler);
+				chainGroup.addEventListener(ValueEvent.CLOSE_IMAGE, closeImageHandler);
+				chainGroup.addEventListener(ResizeEvent.RESIZE, chainGroupResizeHandler);
+			}
+
+			private function previewBtn_clickHandler(event:MouseEvent):void
+			{
+				var bmd:BitmapData=getBitmapData();
+				if (bmd)
+				{
+					var preview:ImagePreview=new ImagePreview();
+					preview.bitmapData=getBitmapData();
+					PopUpManager.addPopUp(preview, parentApplication.systemManager, true);
+					PopUpManager.centerPopUp(preview);
+				}
+			}
+			
+			private function chainGroupResizeHandler(event:ResizeEvent):void
+			{
+				if(event.oldWidth != chainGroup.width)
+				{
+					var len:int = chainGroup.numElements;
+					for (var i:int =0; i< len; i++)
+					{
+						var o:ImageBox = chainGroup.getElementAt(i) as ImageBox;
+						o.width = chainGroup.width;
+						o.coordinateImgSize();
+						o.setMask();
+					}
+				}
+			}
+
+			private function submitBtn_clickHandler(event:MouseEvent):void
+			{
+				var bmd:BitmapData=getBitmapData();
+				if (bmd)
+				{
+					var byteArr:ByteArray=new PNGEncoder().encode(getBitmapData());
+					var fileRefer:FileReference=new FileReference();
+					fileRefer.save(byteArr, new Date().time + ".png");
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10"
+						  paddingTop="10"
+						  paddingRight="10"
+						  paddingLeft="10"/>
+	</s:layout>
+	<s:Scroller width="100%"
+				height="100%"
+				horizontalScrollPolicy="off">
+		<s:VGroup width="100%"
+				  height="100%">
+			<s:VGroup id="chainWrapper" 
+					  visible="false"
+					  includeInLayout="false"
+					  paddingLeft="5"
+					  paddingRight="5"
+					  paddingTop="5"
+					  paddingBottom="5"
+					  width="100%">
+				<s:VGroup id="chainGroup"
+						  gap="5"
+						  width="100%">
+				</s:VGroup>
+			</s:VGroup>
+			<s:HGroup width="100%"
+					  paddingLeft="5"
+					  paddingRight="5">
+				<s:Button id="addExtraBtn"
+						  height="60"
+						  width="100%"
+						  cornerRadius="5"
+						  label="+添加图片"
+						  buttonMode="true"
+						  skinClass="me.shitao.imagecollage.skin.ImageButtonSkin"
+						  click="addExtarBtn_clickHandler(event);"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:Scroller>
+	<s:Group id="controlbar"
+			 width="100%">
+		<s:layout>
+			<s:HorizontalLayout gap="10"
+								horizontalAlign="right"
+								verticalAlign="middle"/>
+		</s:layout>
+		<s:Button id="previewBtn"
+				  label="预览"
+				  click="previewBtn_clickHandler(event);"/>
+		<s:Button id="submitBtn"
+				  label="提交"
+				  click="submitBtn_clickHandler(event);"/>
+		<s:Button label="取消"/>
+	</s:Group>
+</s:BorderContainer>

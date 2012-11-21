@@ -1,39 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
-				   xmlns:s="library://ns.adobe.com/flex/spark" 
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009"
+				   xmlns:s="library://ns.adobe.com/flex/spark"
 				   xmlns:mx="library://ns.adobe.com/flex/mx"
-				   width="200" height="30">
+				   width="200"
+				   height="30">
 
 	<fx:Script>
 		<![CDATA[
 			import me.shitao.imagecollage.event.ValueEvent;
 			import me.shitao.imagecollage.vo.ScaleVo;
-			
+
 			private var _scale:ScaleVo;
-			
+
 			[Bindable("scaleChanged")]
 			public function get scale():ScaleVo
 			{
 				return _scale;
 			}
-			
+
 			public function set scale(value:ScaleVo):void
 			{
-				if(_scale != value)
+				if (_scale != value)
 				{
-					_scale = value;
+					_scale=value;
 					this.dispatchEvent(new Event("scaleChanged"));
 				}
 			}
-			
+
 			public function setScale(value:Number):void
 			{
-				hslider.value = value;
+				hslider.value=value;
 			}
-			
+
 			protected function hslider_changeHandler(event:Event):void
 			{
-				_scale.currentValue = hslider.value;
+				_scale.currentValue=hslider.value;
 			}
 		]]>
 	</fx:Script>
@@ -42,8 +43,16 @@
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	<s:layout>
-		<s:HorizontalLayout horizontalAlign="right" verticalAlign="middle" gap="5" paddingLeft="10" paddingRight="10" />
+		<s:HorizontalLayout horizontalAlign="right"
+							verticalAlign="middle"
+							gap="5"
+							paddingLeft="10"
+							paddingRight="10"/>
 	</s:layout>
-	<s:HSlider id="hslider" width="100" minimum="1" maximum="5" stepSize="0.1"
+	<s:HSlider id="hslider"
+			   width="100"
+			   minimum="1"
+			   maximum="5"
+			   stepSize="0.1"
 			   change="hslider_changeHandler(event)"/>
 </s:BorderContainer>

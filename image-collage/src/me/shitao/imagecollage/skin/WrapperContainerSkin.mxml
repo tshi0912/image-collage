@@ -17,9 +17,9 @@
 	<s:Rect left="0" top="0" right="0" bottom="0">
 		<s:filters>
 			<s:DropShadowFilter 
-				blurX="3" blurY="3" 
+				blurX="4" blurY="4" 
 				alpha="0.3" 
-				distance="3" 
+				distance="5" 
 				angle="45"                 
 				knockout="true"/>
 		</s:filters>
@@ -29,11 +29,11 @@
 	</s:Rect>
 	
 	<!-- layer 1: border -->
-	<s:Rect left="0" right="0" top="0" bottom="0">
+	<!--s:Rect left="0" right="0" top="0" bottom="0">
 		<s:stroke>
 			<s:SolidColorStroke color="0x000000" alpha="0.50" weight="1"/>
 		</s:stroke>
-	</s:Rect>
+	</s:Rect-->
 	
 	<!-- SkinParts
 	name=contentGroup, type=spark.components.Group, required=false
